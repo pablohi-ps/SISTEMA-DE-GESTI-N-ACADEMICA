@@ -6,6 +6,11 @@ import { db, verifyPassword, hashPassword } from './db.js';
 import teacherRouter from './routes/teacher.js';
 import studentRouter from './routes/student.js';
 import { authenticateToken } from './middleware/auth.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -13,7 +18,7 @@ const JWT_SECRET = 'novaedu_super_secret_key_2026';
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/teacher', teacherRouter);
 app.use('/api/student', studentRouter);
 
@@ -401,6 +406,15 @@ app.get('/api/contacts', authenticateToken, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
+});
+
+// Serve static files from Vite build output folder in production
+const distPath = path.resolve(__dirname, '../dist');
+app.use(express.static(distPath));
+
+// For all other routes, send back index.html for React Router's SPA routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 app.listen(PORT, () => {

@@ -2,13 +2,18 @@ import express from 'express';
 import { db } from '../db.js';
 import multer from 'multer';
 import { authenticateToken } from '../middleware/auth.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
 // MULTER CONFIG
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, path.join(__dirname, '../uploads/'));
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname);
